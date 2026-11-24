@@ -32,3 +32,23 @@ Three database tables are planned:
 ## Testing Evidence
 
 Database creation and table verification will be documented with screenshots.
+
+-----------------------------------------------------------------
+
+### Authentication Implementation
+
+- Implemented user authentication using Flask-Login.
+- Used Werkzeug to hash passwords before storing them in SQLite.
+- Protected the dashboard using `@login_required`.
+- Implemented logout using POST requests with CSRF protection.
+- Used generic error messages for incorrect login attempts.
+
+### Authentication Testing
+
+- Verify successful administrator login.
+- Verify successful analyst login.
+- Verify incorrect-password handling.
+- Verify logout and unauthenticated access restrictions.
+- Inspect database records to confirm passwords are hashed.
+
+**Evidence:** Screenshots 02–06, with test outcomes recorded after execution.

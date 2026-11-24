@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVuln - Login</title>
+</head>
+<body>
+    <h1>SecureVuln</h1>
+    <h2>Login</h2>
+
+    <!-- Show an error if the username or password is incorrect. -->
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+        <!-- This token helps protect the form against CSRF attacks. -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <br><br>
+
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
