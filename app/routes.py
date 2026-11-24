@@ -1,5 +1,5 @@
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 
@@ -45,3 +45,14 @@ def logout():
     # End the session so the user must log in again.
     logout_user()
     return redirect(url_for("main.login"))
+
+
+
+@main.route("/admin")
+@login_required
+def admin():
+    # Only administrators should be able to access this page.
+    if current_user.role != "admin":
+        abort(403)
+
+    return render_template("admin.html")

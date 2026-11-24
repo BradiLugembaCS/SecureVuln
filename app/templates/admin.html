@@ -1,0 +1,17 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SecureVuln - Admin</title>
+</head>
+<body>
+    <h1>Administrator Dashboard</h1>
+
+    <p>Welcome, {{ current_user.username }}!</p>
+    <p>This page is restricted to administrators.</p>
+
+    <!-- Return to the main dashboard. -->
+    <a href="{{ url_for('main.home') }}">Back to Dashboard</a>
+</body>
+</html>

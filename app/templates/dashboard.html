@@ -11,6 +11,15 @@
     <p>Welcome, {{ current_user.username }}!</p>
     <p>Your role: {{ current_user.role }}</p>
 
+
+    <!-- Only show the admin link to administrators. -->
+    {% if current_user.role == "admin" %}
+        <p>
+            <a href="{{ url_for('main.admin') }}">Administrator Dashboard</a>
+        </p>
+    {% endif %}
+
+
     <!-- Logging out uses POST so the request can be CSRF-protected. -->
     <form action="{{ url_for('main.logout') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
