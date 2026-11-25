@@ -52,3 +52,32 @@ Database creation and table verification will be documented with screenshots.
 - Inspect database records to confirm passwords are hashed.
 
 **Evidence:** Screenshots 02–06, with test outcomes recorded after execution.
+
+----------------------------------------------------
+
+### Role-Based Access Control (RBAC)
+
+SecureVuln uses two user roles: administrator and security analyst. The application checks user permissions on the server before allowing access to restricted functionality.
+
+The administrator route is protected using Flask-Login and an explicit role check. Users without administrator privileges receive an HTTP 403 Forbidden response.
+
+**Testing:** Verify that administrators can access `/admin`, analysts receive a 403 response, and unauthenticated users are redirected to the login page.
+
+**Security benefit:** This helps prevent broken access control and privilege escalation through direct URL access.
+
+--------------------------------------------------------------------
+
+
+### Vulnerability Management — Create and Read
+
+SecureVuln allows authenticated users to manually submit vulnerability reports containing a title, affected system, severity and description.
+
+Submitted information is validated by the Flask backend before being stored in SQLite using SQLAlchemy.
+
+New vulnerability records are automatically assigned an Open status and linked to the authenticated user.
+
+The dashboard retrieves and displays vulnerability records using Jinja2 templates, which escape untrusted HTML by default.
+
+**Security considerations:** Authentication checks, server-side validation, CSRF protection, safe database operations and HTML escaping.
+
+**Testing:** Verify successful submission, database storage, dashboard display, rejection of invalid inputs and restrictions on unauthenticated access.

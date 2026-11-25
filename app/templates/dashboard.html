@@ -11,16 +11,58 @@
     <p>Welcome, {{ current_user.username }}!</p>
     <p>Your role: {{ current_user.role }}</p>
 
+    <!-- Display messages after a successful submission. -->
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
 
-    <!-- Only show the admin link to administrators. -->
+    <a href="{{ url_for('main.add_vulnerability') }}">
+        Add Vulnerability
+    </a>
+
+    <!-- Only administrators see this link. -->
     {% if current_user.role == "admin" %}
         <p>
-            <a href="{{ url_for('main.admin') }}">Administrator Dashboard</a>
+            <a href="{{ url_for('main.admin') }}">
+                Administrator Dashboard
+            </a>
         </p>
     {% endif %}
 
+    <h2>Reported Vulnerabilities</h2>
 
-    <!-- Logging out uses POST so the request can be CSRF-protected. -->
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Affected System</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Reported By</th>
+        </tr>
+
+        <!-- Display each report stored in the database. -->
+        {% for vulnerability in vulnerabilities %}
+        <tr>
+            <td>{{ vulnerability.id }}</td>
+            <td>{{ vulnerability.title }}</td>
+            <td>{{ vulnerability.affected_system }}</td>
+            <td>{{ vulnerability.severity }}</td>
+            <td>{{ vulnerability.status }}</td>
+            <td>{{ vulnerability.created_by }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">No vulnerabilities reported yet.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+
+    <!-- Logout must use POST and include a CSRF token. -->
     <form action="{{ url_for('main.logout') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit">Logout</button>

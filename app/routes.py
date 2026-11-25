@@ -5,14 +5,26 @@ from werkzeug.security import check_password_hash
 
 from app.models import User
 
+from app import db
+from app.models import Vulnerability
+
 main = Blueprint("main", __name__)
+
 
 
 @main.route("/")
 @login_required
 def home():
-    # Only logged-in users can access the dashboard.
-    return render_template("dashboard.html")
+    # Show the newest vulnerability reports first.
+    vulnerabilities = Vulnerability.query.order_by(
+        Vulnerability.created_at.desc()
+    ).all()
+
+    return render_template(
+        "dashboard.html",
+        vulnerabilities=vulnerabilities
+    )
+
 
 
 @main.route("/login", methods=["GET", "POST"])
@@ -56,3 +68,42 @@ def admin():
         abort(403)
 
     return render_template("admin.html")
+
+
+
+@main.route("/vulnerabilities/add", methods=["GET", "POST"])
+@login_required
+def add_vulnerability():
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        affected_system = request.form.get("affected_system", "").strip()
+        severity = request.form.get("severity", "")
+
+        # Check the input on the server, not just in the HTML form.
+        if not all([title, description, affected_system]):
+            flash("All fields are required.")
+        elif len(title) > 150 or len(affected_system) > 100:
+            flash("Title or affected system is too long.")
+        elif len(description) > 2000:
+            flash("Description must be 2000 characters or fewer.")
+        elif severity not in ["Low", "Medium", "High", "Critical"]:
+            flash("Invalid severity selected.")
+        else:
+            # Store the report and link it to the logged-in user.
+            vulnerability = Vulnerability(
+                title=title,
+                description=description,
+                affected_system=affected_system,
+                severity=severity,
+                status="Open",
+                created_by=current_user.id
+            )
+
+            db.session.add(vulnerability)
+            db.session.commit()
+
+            flash("Vulnerability added successfully.")
+            return redirect(url_for("main.home"))
+
+    return render_template("add_vulnerability.html")
