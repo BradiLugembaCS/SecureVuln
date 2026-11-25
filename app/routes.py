@@ -107,3 +107,65 @@ def add_vulnerability():
             return redirect(url_for("main.home"))
 
     return render_template("add_vulnerability.html")
+
+
+
+
+@main.route("/vulnerabilities/<int:id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_vulnerability(id):
+    # Find the vulnerability or return 404 if it doesn't exist.
+    vulnerability = db.get_or_404(Vulnerability, id)
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        affected_system = request.form.get("affected_system", "").strip()
+        severity = request.form.get("severity", "")
+        status = request.form.get("status", "")
+
+        # Check the submitted values before updating the database.
+        if not all([title, description, affected_system]):
+            flash("All fields are required.")
+        elif len(title) > 150 or len(affected_system) > 100:
+            flash("Title or affected system is too long.")
+        elif len(description) > 2000:
+            flash("Description must be 2000 characters or fewer.")
+        elif severity not in ["Low", "Medium", "High", "Critical"]:
+            flash("Invalid severity selected.")
+        elif status not in ["Open", "In Progress", "Resolved"]:
+            flash("Invalid status selected.")
+        else:
+            # Only save the changes after all checks have passed.
+            vulnerability.title = title
+            vulnerability.description = description
+            vulnerability.affected_system = affected_system
+            vulnerability.severity = severity
+            vulnerability.status = status
+
+            db.session.commit()
+
+            flash("Vulnerability updated successfully.")
+            return redirect(url_for("main.home"))
+
+    return render_template(
+        "edit_vulnerability.html",
+        vulnerability=vulnerability
+    )
+
+
+@main.route("/vulnerabilities/<int:id>/delete", methods=["POST"])
+@login_required
+def delete_vulnerability(id):
+    # Analysts must never be allowed to delete reports.
+    if current_user.role != "admin":
+        abort(403)
+
+    # Check that the vulnerability exists before deleting it.
+    vulnerability = db.get_or_404(Vulnerability, id)
+
+    db.session.delete(vulnerability)
+    db.session.commit()
+
+    flash("Vulnerability deleted successfully.")
+    return redirect(url_for("main.home"))

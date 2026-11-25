@@ -41,6 +41,7 @@
             <th>Severity</th>
             <th>Status</th>
             <th>Reported By</th>
+            <th>Actions</th>
         </tr>
 
         <!-- Display each report stored in the database. -->
@@ -52,10 +53,31 @@
             <td>{{ vulnerability.severity }}</td>
             <td>{{ vulnerability.status }}</td>
             <td>{{ vulnerability.created_by }}</td>
+            <td>
+                <!-- Both roles can edit vulnerability reports. -->
+                <a href="{{ url_for('main.edit_vulnerability', id=vulnerability.id) }}">
+                    Edit
+                </a>
+
+                <!-- Only administrators can see the delete button. -->
+                {% if current_user.role == "admin" %}
+                    <form action="{{ url_for('main.delete_vulnerability', id=vulnerability.id) }}"
+                        method="POST" style="display:inline;">
+
+                        <!-- Every delete request needs a valid CSRF token. -->
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <button type="submit"
+                                onclick="return confirm('Delete this vulnerability?');">
+                            Delete
+                        </button>
+                    </form>
+                {% endif %}
+            </td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="6">No vulnerabilities reported yet.</td>
+            <td colspan="7">No vulnerabilities reported yet.</td>
         </tr>
         {% endfor %}
     </table>
